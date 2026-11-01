@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: loan-approval-prediction
+    runtime: python
+    rootDir: django_app
+    buildCommand: |
+      pip install -r ../requirements.txt &&
+      python manage.py collectstatic --noinput &&
+      python manage.py migrate --noinput
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings
+      - key: PYTHONPATH
+        value: /opt/render/project/src
