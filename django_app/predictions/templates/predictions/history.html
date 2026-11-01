@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Prediction History{% endblock %}
+{% block page_title %}Prediction History{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <p class="text-muted mb-0">Your loan prediction history.</p>
+  <a href="{% url 'predictions:predict' %}" class="btn btn-primary btn-sm">
+    <i class="bi bi-lightning me-1"></i>New Prediction
+  </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Result</th>
+          <th>Approval Probability</th>
+          <th>Confidence</th>
+          <th>Date</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pred in predictions %}
+        <tr>
+          <td class="text-muted small">{{ pred.id }}</td>
+          <td>
+            {% if pred.is_approved %}
+              <span class="badge bg-success-subtle text-success border border-success-subtle">
+                <i class="bi bi-check-circle me-1"></i>Approved
+              </span>
+            {% else %}
+              <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                <i class="bi bi-x-circle me-1"></i>Rejected
+              </span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="progress flex-grow-1" style="height:6px;min-width:80px">
+                <div class="progress-bar bg-success" style="width:{{ pred.approved_pct }}%"></div>
+              </div>
+              <small class="text-muted">{{ pred.approved_pct }}%</small>
+            </div>
+          </td>
+          <td><small>{{ pred.prediction_pct }}%</small></td>
+          <td class="text-muted small">{{ pred.created_at|date:"M d, Y H:i" }}</td>
+          <td>
+            <a href="{% url 'predictions:result' pred.pk %}" class="btn btn-xs btn-outline-secondary" style="font-size:.75rem;padding:2px 8px">
+              <i class="bi bi-eye me-1"></i>View
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-5">
+            <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+            No predictions yet. <a href="{% url 'predictions:predict' %}">Make your first prediction</a>.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if predictions.has_other_pages %}
+  <div class="card-footer bg-white border-0 d-flex justify-content-center py-3">
+    <nav aria-label="History pagination">
+      <ul class="pagination pagination-sm mb-0">
+        {% if predictions.has_previous %}
+          <li class="page-item"><a class="page-link" href="?page={{ predictions.previous_page_number }}">Previous</a></li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">{{ predictions.number }} / {{ predictions.paginator.num_pages }}</span></li>
+        {% if predictions.has_next %}
+          <li class="page-item"><a class="page-link" href="?page={{ predictions.next_page_number }}">Next</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

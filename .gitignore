@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.so
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+
+# Environment variables
+.env
+
+# Django
+*.sqlite3
+media/
+django_app/media/
+
+# ML artifacts (regenerate by running src/model_training.py)
+models/best_model.joblib
+models/feature_columns.json
+models/model_metadata.json
+visualizations/*.png
+reports/*.csv
+reports/*.txt
+data/processed/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Keep empty dirs
+!models/.gitkeep
+!django_app/media/.gitkeep

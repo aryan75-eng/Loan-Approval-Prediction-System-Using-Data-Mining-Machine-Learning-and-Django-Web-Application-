@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+{% block title %}Preview — {{ dataset.dataset_name }}{% endblock %}
+{% block page_title %}Dataset Preview{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h5 class="fw-semibold mb-0">{{ dataset.dataset_name }}</h5>
+    <small class="text-muted">Uploaded {{ dataset.upload_date|date:"M d, Y H:i" }}</small>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'datasets:download' dataset.pk %}" class="btn btn-sm btn-outline-primary">
+      <i class="bi bi-download me-1"></i>Download
+    </a>
+    <a href="{% url 'datasets:list' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+  </div>
+</div>
+
+{% if error %}
+  <div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>{{ error }}</div>
+{% else %}
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    {% include "partials/stat_card.html" with icon="bi-list-ol" label="Total Rows" value=total_records color="primary" %}
+  </div>
+  <div class="col-6 col-md-3">
+    {% include "partials/stat_card.html" with icon="bi-layout-three-columns" label="Columns" value=columns|length color="info" %}
+  </div>
+  <div class="col-6 col-md-3">
+    {% include "partials/stat_card.html" with icon="bi-question-circle" label="Missing Values" value=missing_total color="warning" %}
+  </div>
+  <div class="col-6 col-md-3">
+    {% include "partials/stat_card.html" with icon="bi-copy" label="Duplicates" value=duplicate_count color="secondary" %}
+  </div>
+</div>
+
+<!-- Column Info -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header bg-white border-0 py-3">
+    <h6 class="mb-0 fw-semibold"><i class="bi bi-info-circle me-2 text-primary"></i>Column Information</h6>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover mb-0">
+      <thead class="table-light">
+        <tr><th>Column</th><th>Data Type</th><th>Missing</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        {% for col in columns %}
+        <tr>
+          <td class="fw-semibold"><code>{{ col }}</code></td>
+          <td><span class="badge bg-light text-dark border">{{ dtypes|get_item:col }}</span></td>
+          <td>{{ missing|get_item:col }}</td>
+          <td>
+            {% if missing|get_item:col > 0 %}
+              <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Has missing</span>
+            {% else %}
+              <span class="badge bg-success-subtle text-success border border-success-subtle">Complete</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Data Preview -->
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white border-0 py-3">
+    <h6 class="mb-0 fw-semibold"><i class="bi bi-table me-2 text-primary"></i>First 10 Rows</h6>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          {% for col in columns %}<th class="small">{{ col }}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          {% for col in columns %}
+          <td class="small">{{ row|get_item:col }}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endif %}
+{% endblock %}

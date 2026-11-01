@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Model Performance{% endblock %}
+{% block page_title %}Model Performance{% endblock %}
+
+{% block content %}
+
+{% if selected %}
+<div class="alert alert-success d-flex gap-2 align-items-center py-2 mb-4">
+  <i class="bi bi-trophy-fill fs-5"></i>
+  <div>
+    Selected model: <strong>{{ selected.model_name }}</strong>
+    &nbsp;|&nbsp; F1: <strong>{{ selected.f1_pct }}%</strong>
+    &nbsp;|&nbsp; Accuracy: <strong>{{ selected.accuracy_pct }}%</strong>
+    &nbsp;|&nbsp; Trained: {{ selected.training_date|date:"M d, Y" }}
+  </div>
+</div>
+{% else %}
+<div class="alert alert-warning py-2 mb-4">
+  <i class="bi bi-exclamation-triangle me-2"></i>
+  No model metrics loaded. Run <code>python manage.py load_model_metrics</code>.
+</div>
+{% endif %}
+
+<div class="row g-4">
+
+  <!-- Comparison Table -->
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="mb-0 fw-semibold"><i class="bi bi-table me-2 text-primary"></i>Model Comparison</h6>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Model</th>
+              <th>Accuracy</th>
+              <th>Precision</th>
+              <th>Recall</th>
+              <th>F1 Score</th>
+              <th>CV Mean ± Std</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for perf in performances %}
+            <tr {% if perf.is_selected %}class="table-success"{% endif %}>
+              <td class="fw-semibold">
+                {% if perf.is_selected %}<i class="bi bi-trophy-fill text-warning me-1"></i>{% endif %}
+                {{ perf.model_name }}
+              </td>
+              <td>{{ perf.accuracy_pct }}%</td>
+              <td>{{ perf.precision_pct }}%</td>
+              <td>{{ perf.recall_pct }}%</td>
+              <td><strong>{{ perf.f1_pct }}%</strong></td>
+              <td class="small text-muted">{{ perf.cv_mean|floatformat:4 }} ± {{ perf.cv_std|floatformat:4 }}</td>
+              <td>
+                {% if perf.is_selected %}
+                  <span class="badge bg-success-subtle text-success border border-success-subtle">Selected</span>
+                {% else %}
+                  <span class="badge bg-light text-muted border">Not selected</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="text-center text-muted py-4">No metrics available.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bar Chart -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="mb-0 fw-semibold"><i class="bi bi-bar-chart me-2 text-primary"></i>F1 Score Comparison</h6>
+      </div>
+      <div class="card-body d-flex align-items-center" style="height:280px">
+        <canvas id="f1Chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Selection rationale -->
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="mb-0 fw-semibold"><i class="bi bi-info-circle me-2 text-primary"></i>Model Selection Rationale</h6>
+      </div>
+      <div class="card-body">
+        <p class="mb-2">
+          The best model is selected by <strong>highest test F1 score</strong>. In case of a tie,
+          the model with higher <strong>Recall</strong> is preferred, as false negatives
+          (approved loans that default) are typically more costly than false positives.
+        </p>
+        {% if model_info %}
+        <div class="row g-2 mt-2">
+          <div class="col-md-3"><span class="text-muted small">Model Name</span><br><strong>{{ model_info.model_name }}</strong></div>
+          <div class="col-md-3"><span class="text-muted small">Training Date</span><br><strong>{{ model_info.training_date|slice:":10" }}</strong></div>
+          <div class="col-md-3"><span class="text-muted small">Random Seed</span><br><strong>{{ model_info.random_seed }}</strong></div>
+          <div class="col-md-3"><span class="text-muted small">CV Folds</span><br><strong>{{ model_info.cv_folds }}</strong></div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  const labels = [{% for p in performances %}"{{ p.model_name }}"{% if not forloop.last %},{% endif %}{% endfor %}];
+  const f1Data = [{% for p in performances %}{{ p.f1_pct }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  const colors = [{% for p in performances %}"{% if p.is_selected %}#43A047{% else %}#1976D2{% endif %}"{% if not forloop.last %},{% endif %}{% endfor %}];
+
+  if (labels.length > 0) {
+    new Chart(document.getElementById('f1Chart'), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'F1 Score (%)',
+          data: f1Data,
+          backgroundColor: colors,
+          borderRadius: 6,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { x: { beginAtZero: true, max: 100 } },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+</script>
+{% endblock %}

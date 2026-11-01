@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Predict Loan Approval{% endblock %}
+{% block page_title %}Predict Loan Approval{% endblock %}
+
+{% block content %}
+{% if model_missing %}
+<div class="alert alert-danger d-flex gap-2 align-items-center">
+  <i class="bi bi-cpu fs-5"></i>
+  <div>The prediction model has not been trained yet.
+    Run <code>python src/model_training.py</code> from the project root, then
+    <code>python manage.py load_model_metrics</code>.
+  </div>
+</div>
+{% else %}
+
+<div class="row justify-content-center">
+  <div class="col-lg-8 col-xl-7">
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 py-3">
+        <h5 class="mb-0 fw-semibold">
+          <i class="bi bi-lightning me-2 text-primary"></i>Applicant Information
+        </h5>
+        <p class="text-muted small mb-0 mt-1">
+          Fill in the applicant details below. For educational purposes only.
+        </p>
+      </div>
+      <div class="card-body p-4">
+
+        <form method="post" novalidate id="predictForm">
+          {% csrf_token %}
+
+          <div class="row g-3">
+
+            <!-- ── Numeric Fields ─────────────────────────────────────────── -->
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.ApplicantIncome.label }} <span class="text-danger">*</span></label>
+              {{ form.ApplicantIncome }}
+              {% if form.ApplicantIncome.errors %}<div class="invalid-feedback d-block">{{ form.ApplicantIncome.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.CoapplicantIncome.label }}</label>
+              {{ form.CoapplicantIncome }}
+              {% if form.CoapplicantIncome.errors %}<div class="invalid-feedback d-block">{{ form.CoapplicantIncome.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.LoanAmount.label }} <span class="text-danger">*</span></label>
+              {{ form.LoanAmount }}
+              {% if form.LoanAmount.errors %}<div class="invalid-feedback d-block">{{ form.LoanAmount.errors.0 }}</div>{% endif %}
+              <div class="form-text">Enter in thousands (e.g. 128 = ₹1,28,000)</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.Loan_Amount_Term.label }}</label>
+              {{ form.Loan_Amount_Term }}
+              {% if form.Loan_Amount_Term.errors %}<div class="invalid-feedback d-block">{{ form.Loan_Amount_Term.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.Credit_History.label }} <span class="text-danger">*</span></label>
+              {{ form.Credit_History }}
+              {% if form.Credit_History.errors %}<div class="invalid-feedback d-block">{{ form.Credit_History.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.Gender.label }} <span class="text-danger">*</span></label>
+              {{ form.Gender }}
+              {% if form.Gender.errors %}<div class="invalid-feedback d-block">{{ form.Gender.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.Married.label }}</label>
+              {{ form.Married }}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.Dependents.label }}</label>
+              {{ form.Dependents }}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.Education.label }}</label>
+              {{ form.Education }}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.Self_Employed.label }}</label>
+              {{ form.Self_Employed }}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ form.Property_Area.label }}</label>
+              {{ form.Property_Area }}
+            </div>
+
+          </div><!-- /row -->
+
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger mt-3 py-2">{{ form.non_field_errors }}</div>
+          {% endif %}
+
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary px-4" id="submitBtn">
+              <i class="bi bi-lightning-charge me-2"></i>Predict Approval
+            </button>
+            <button type="reset" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="alert alert-secondary mt-3 py-2 small">
+      <i class="bi bi-shield-exclamation me-1"></i>
+      <strong>Disclaimer:</strong> This prediction is for <strong>educational purposes only</strong>
+      and should not be used as a real lending decision. Results depend on a small training dataset.
+    </div>
+
+  </div>
+</div>
+
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.getElementById('predictForm')?.addEventListener('submit', function() {
+    const btn = document.getElementById('submitBtn');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Predicting...';
+    btn.disabled = true;
+  });
+</script>
+{% endblock %}

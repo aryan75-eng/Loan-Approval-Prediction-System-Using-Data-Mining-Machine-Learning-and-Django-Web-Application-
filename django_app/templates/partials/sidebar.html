@@ -1,0 +1,106 @@
+{% load static %}
+<nav id="sidebar" class="sidebar d-flex flex-column flex-shrink-0 p-3">
+
+  <!-- Brand -->
+  <a href="{% url 'dashboard:home' %}" class="sidebar-brand d-flex align-items-center mb-3 text-decoration-none">
+    <i class="bi bi-bank2 fs-4 me-2"></i>
+    <span class="fs-6 fw-bold">LoanPredict</span>
+  </a>
+
+  <hr class="sidebar-divider">
+
+  <ul class="nav nav-pills flex-column mb-auto">
+
+    <!-- Dashboard -->
+    <li class="nav-item">
+      <a href="{% url 'dashboard:home' %}"
+         class="nav-link {% if request.resolver_match.namespace == 'dashboard' %}active{% endif %}">
+        <i class="bi bi-speedometer2 me-2"></i>Dashboard
+      </a>
+    </li>
+
+    <!-- Datasets -->
+    <li class="nav-item">
+      <a class="nav-link {% if request.resolver_match.namespace == 'datasets' %}active{% endif %}"
+         data-bs-toggle="collapse" href="#datasetsMenu" role="button"
+         aria-expanded="{{ request.resolver_match.namespace == 'datasets'|yesno:'true,false' }}">
+        <i class="bi bi-database me-2"></i>Datasets
+        <i class="bi bi-chevron-down ms-auto small"></i>
+      </a>
+      <div class="collapse {% if request.resolver_match.namespace == 'datasets' %}show{% endif %}" id="datasetsMenu">
+        <ul class="nav nav-pills flex-column ms-3 mt-1">
+          <li><a href="{% url 'datasets:upload' %}" class="nav-link py-1 {% if request.resolver_match.url_name == 'upload' %}active{% endif %}">
+            <i class="bi bi-cloud-upload me-2 small"></i>Upload
+          </a></li>
+          <li><a href="{% url 'datasets:list' %}" class="nav-link py-1 {% if request.resolver_match.url_name == 'list' %}active{% endif %}">
+            <i class="bi bi-list-ul me-2 small"></i>My Datasets
+          </a></li>
+        </ul>
+      </div>
+    </li>
+
+    <!-- Analytics -->
+    <li class="nav-item">
+      <a class="nav-link {% if request.resolver_match.namespace == 'analytics' %}active{% endif %}"
+         data-bs-toggle="collapse" href="#analyticsMenu" role="button"
+         aria-expanded="{{ request.resolver_match.namespace == 'analytics'|yesno:'true,false' }}">
+        <i class="bi bi-bar-chart me-2"></i>Analytics
+        <i class="bi bi-chevron-down ms-auto small"></i>
+      </a>
+      <div class="collapse {% if request.resolver_match.namespace == 'analytics' %}show{% endif %}" id="analyticsMenu">
+        <ul class="nav nav-pills flex-column ms-3 mt-1">
+          <li><a href="{% url 'analytics:overview' %}" class="nav-link py-1 {% if request.resolver_match.url_name == 'overview' %}active{% endif %}">
+            <i class="bi bi-pie-chart me-2 small"></i>Overview
+          </a></li>
+          <li><a href="{% url 'analytics:preprocessing' %}" class="nav-link py-1 {% if request.resolver_match.url_name == 'preprocessing' %}active{% endif %}">
+            <i class="bi bi-funnel me-2 small"></i>Preprocessing
+          </a></li>
+          <li><a href="{% url 'analytics:visualizations' %}" class="nav-link py-1 {% if request.resolver_match.url_name == 'visualizations' %}active{% endif %}">
+            <i class="bi bi-images me-2 small"></i>Visualizations
+          </a></li>
+        </ul>
+      </div>
+    </li>
+
+    <!-- Predictions -->
+    <li class="nav-item">
+      <a class="nav-link {% if request.resolver_match.namespace == 'predictions' %}active{% endif %}"
+         data-bs-toggle="collapse" href="#predMenu" role="button"
+         aria-expanded="{{ request.resolver_match.namespace == 'predictions'|yesno:'true,false' }}">
+        <i class="bi bi-lightning me-2"></i>Predictions
+        <i class="bi bi-chevron-down ms-auto small"></i>
+      </a>
+      <div class="collapse {% if request.resolver_match.namespace == 'predictions' %}show{% endif %}" id="predMenu">
+        <ul class="nav nav-pills flex-column ms-3 mt-1">
+          <li><a href="{% url 'predictions:predict' %}" class="nav-link py-1 {% if request.resolver_match.url_name == 'predict' %}active{% endif %}">
+            <i class="bi bi-play-circle me-2 small"></i>Predict Loan
+          </a></li>
+          <li><a href="{% url 'predictions:history' %}" class="nav-link py-1 {% if request.resolver_match.url_name == 'history' %}active{% endif %}">
+            <i class="bi bi-clock-history me-2 small"></i>History
+          </a></li>
+          <li><a href="{% url 'predictions:performance' %}" class="nav-link py-1 {% if request.resolver_match.url_name == 'performance' %}active{% endif %}">
+            <i class="bi bi-trophy me-2 small"></i>Model Performance
+          </a></li>
+        </ul>
+      </div>
+    </li>
+
+  </ul>
+
+  <hr class="sidebar-divider">
+
+  <!-- User info at bottom -->
+  <div class="sidebar-user d-flex align-items-center">
+    <div class="avatar me-2">
+      <i class="bi bi-person-circle fs-4"></i>
+    </div>
+    <div class="flex-grow-1 overflow-hidden">
+      <small class="d-block fw-semibold text-truncate">{{ request.user.get_full_name|default:request.user.username }}</small>
+      <small class="opacity-75" style="font-size:0.7rem">{{ request.user.email|truncatechars:24 }}</small>
+    </div>
+    <a href="{% url 'accounts:logout' %}" class="btn btn-sm btn-outline-light ms-1" title="Logout">
+      <i class="bi bi-box-arrow-right"></i>
+    </a>
+  </div>
+
+</nav>

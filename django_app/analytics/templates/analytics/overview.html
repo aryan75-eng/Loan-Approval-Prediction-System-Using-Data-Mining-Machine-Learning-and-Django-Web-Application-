@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Analytics Overview{% endblock %}
+{% block page_title %}Analytics Overview{% endblock %}
+
+{% block content %}
+{% if not has_dataset %}
+<div class="alert alert-warning d-flex gap-2 align-items-center">
+  <i class="bi bi-exclamation-triangle fs-5"></i>
+  <div>No validated dataset found. <a href="{% url 'datasets:upload' %}">Upload a dataset</a> to see analytics.</div>
+</div>
+{% else %}
+
+<p class="text-muted mb-4">Charts based on: <strong>{{ dataset.dataset_name }}</strong>
+  ({{ dataset.total_records }} rows · uploaded {{ dataset.upload_date|date:"M d, Y" }})
+</p>
+
+<div class="row g-4">
+
+  <!-- Loan Status Distribution -->
+  <div class="col-md-6 col-xl-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="mb-0 fw-semibold">Loan Status Distribution</h6>
+      </div>
+      <div class="card-body d-flex align-items-center justify-content-center" style="height:260px">
+        <canvas id="loanStatusChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Income vs Loan Scatter -->
+  <div class="col-md-6 col-xl-8">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="mb-0 fw-semibold">Applicant Income vs Loan Amount</h6>
+      </div>
+      <div class="card-body" style="height:260px">
+        <canvas id="scatterChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Missing Values -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="mb-0 fw-semibold">Missing Values per Column</h6>
+      </div>
+      <div class="card-body" style="height:260px">
+        <canvas id="missingChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Credit History by Status -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="mb-0 fw-semibold">Credit History vs Loan Status</h6>
+      </div>
+      <div class="card-body" style="height:260px">
+        <canvas id="creditChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+{% if has_dataset %}
+{{ chart_data_json|json_script:"chartDataRaw" }}
+<script>
+  const rawData = JSON.parse(document.getElementById('chartDataRaw').textContent);
+
+  // Loan Status Pie
+  if (rawData.loan_status && rawData.loan_status.data) {
+    new Chart(document.getElementById('loanStatusChart'), {
+      type: 'doughnut',
+      data: {
+        labels: rawData.loan_status.labels,
+        datasets: [{
+          data: rawData.loan_status.data,
+          backgroundColor: ['#43A047','#E53935'],
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } } }
+    });
+  }
+
+  // Scatter
+  if (rawData.scatter && rawData.scatter.approved) {
+    new Chart(document.getElementById('scatterChart'), {
+      type: 'scatter',
+      data: {
+        datasets: [
+          { label: 'Approved', data: rawData.scatter.approved,
+            backgroundColor: 'rgba(67,160,71,0.45)', pointRadius: 4 },
+          { label: 'Rejected', data: rawData.scatter.rejected,
+            backgroundColor: 'rgba(229,57,53,0.45)', pointRadius: 4 },
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: { title: { display: true, text: 'Applicant Income' } },
+          y: { title: { display: true, text: 'Loan Amount (K)' } }
+        }
+      }
+    });
+  }
+
+  // Missing values bar
+  if (rawData.missing && rawData.missing.labels) {
+    new Chart(document.getElementById('missingChart'), {
+      type: 'bar',
+      data: {
+        labels: rawData.missing.labels,
+        datasets: [{ label: 'Missing Count', data: rawData.missing.data,
+          backgroundColor: '#FF9800' }]
+      },
+      options: { responsive: true, maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true } } }
+    });
+  }
+
+  // Credit history stacked bar
+  if (rawData.credit_by_status && rawData.credit_by_status.labels) {
+    new Chart(document.getElementById('creditChart'), {
+      type: 'bar',
+      data: {
+        labels: rawData.credit_by_status.labels,
+        datasets: [
+          { label: 'Approved', data: rawData.credit_by_status.approved,
+            backgroundColor: '#43A047' },
+          { label: 'Rejected', data: rawData.credit_by_status.rejected,
+            backgroundColor: '#E53935' },
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false,
+        scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
+    });
+  }
+</script>
+{% endif %}
+{% endblock %}

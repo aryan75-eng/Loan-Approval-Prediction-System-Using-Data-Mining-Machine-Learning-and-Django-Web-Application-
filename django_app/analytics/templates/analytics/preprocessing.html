@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Preprocessing{% endblock %}
+{% block page_title %}Data Preprocessing{% endblock %}
+
+{% block content %}
+{% if not has_dataset %}
+<div class="alert alert-warning d-flex gap-2 align-items-center">
+  <i class="bi bi-exclamation-triangle fs-5"></i>
+  <div>No validated dataset found. <a href="{% url 'datasets:upload' %}">Upload a dataset</a> first.</div>
+</div>
+{% else %}
+
+<p class="text-muted mb-4">Preprocessing summary for: <strong>{{ dataset.dataset_name }}</strong></p>
+
+<!-- Quick Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    {% include "partials/stat_card.html" with icon="bi-list-ol" label="Total Rows" value=summary.total_rows color="primary" %}
+  </div>
+  <div class="col-6 col-md-3">
+    {% include "partials/stat_card.html" with icon="bi-question-circle" label="Missing Values" value=summary.missing_total color="warning" %}
+  </div>
+  <div class="col-6 col-md-3">
+    {% include "partials/stat_card.html" with icon="bi-copy" label="Duplicates" value=summary.duplicate_count color="secondary" %}
+  </div>
+</div>
+
+<div class="row g-4">
+
+  <!-- Missing Values Per Column -->
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="mb-0 fw-semibold"><i class="bi bi-question-circle me-2 text-warning"></i>Missing Values by Column</h6>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
+          <thead class="table-light"><tr><th>Column</th><th>Missing</th><th>Strategy</th></tr></thead>
+          <tbody>
+            {% for col, count in summary.missing_per_col.items %}
+            <tr>
+              <td><code>{{ col }}</code></td>
+              <td><span class="badge bg-warning-subtle text-warning border border-warning-subtle">{{ count }}</span></td>
+              <td>
+                {% if col in "ApplicantIncome,CoapplicantIncome,LoanAmount,Loan_Amount_Term,Credit_History" %}
+                  <span class="badge bg-info-subtle text-info border border-info-subtle">Median impute</span>
+                {% else %}
+                  <span class="badge bg-secondary-subtle text-secondary border">Mode impute</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" class="text-center text-muted py-3">No missing values!</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Numeric Statistics -->
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="mb-0 fw-semibold"><i class="bi bi-calculator me-2 text-primary"></i>Numeric Feature Statistics</h6>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
+          <thead class="table-light"><tr><th>Feature</th><th>Mean</th><th>Median</th><th>Std</th><th>Min</th><th>Max</th></tr></thead>
+          <tbody>
+            {% for col, stats in summary.numeric_stats.items %}
+            <tr>
+              <td><code>{{ col }}</code></td>
+              <td>{{ stats.mean }}</td>
+              <td>{{ stats.median }}</td>
+              <td>{{ stats.std }}</td>
+              <td>{{ stats.min }}</td>
+              <td>{{ stats.max }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Pipeline Steps -->
+<div class="card border-0 shadow-sm mt-4">
+  <div class="card-header bg-white border-0 py-3">
+    <h6 class="mb-0 fw-semibold"><i class="bi bi-diagram-3 me-2 text-primary"></i>Preprocessing Pipeline Steps</h6>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      {% for step, desc in pipeline_steps %}
+      <div class="col-md-4">
+        <div class="d-flex align-items-start gap-2">
+          <span class="badge bg-primary rounded-circle" style="min-width:24px;min-height:24px;line-height:24px;text-align:center">{{ forloop.counter }}</span>
+          <div>
+            <div class="fw-semibold small">{{ step }}</div>
+            <div class="text-muted" style="font-size:0.8rem">{{ desc }}</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endif %}
+{% endblock %}

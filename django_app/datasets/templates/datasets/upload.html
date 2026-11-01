@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Upload Dataset{% endblock %}
+{% block page_title %}Upload Dataset{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-2">
+  <div class="col-lg-7">
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 py-3">
+        <h5 class="mb-0 fw-semibold"><i class="bi bi-cloud-upload me-2 text-primary"></i>Upload New Dataset</h5>
+      </div>
+      <div class="card-body p-4">
+
+        <div class="alert alert-info py-2 mb-4">
+          <i class="bi bi-info-circle me-2"></i>
+          Accepted: <strong>.csv</strong>, <strong>.xlsx</strong> · Max size: <strong>10 MB</strong> ·
+          Must include a <code>Loan_Status</code> column for analytics to work fully.
+        </div>
+
+        <form method="post" enctype="multipart/form-data" novalidate id="uploadForm">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Dataset Name <span class="text-danger">*</span></label>
+            {{ form.dataset_name }}
+            {% if form.dataset_name.errors %}
+              <div class="invalid-feedback d-block">{{ form.dataset_name.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold">File <span class="text-danger">*</span></label>
+            {{ form.file }}
+            {% if form.file.errors %}
+              <div class="invalid-feedback d-block">{{ form.file.errors.0 }}</div>
+            {% endif %}
+            <div class="form-text">{{ form.file.help_text }}</div>
+          </div>
+
+          <!-- Upload guidelines -->
+          <div class="card bg-light border-0 p-3 mb-4">
+            <h6 class="fw-semibold mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Expected Columns</h6>
+            <div class="row row-cols-2 row-cols-md-3 g-1">
+              {% for col in expected_columns %}
+              <div><code class="small">{{ col }}</code></div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary px-4" id="uploadBtn">
+            <i class="bi bi-upload me-2"></i>Upload Dataset
+          </button>
+          <a href="{% url 'datasets:list' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+        </form>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/form_validation.js' %}"></script>
+<script>
+  document.getElementById('uploadForm').addEventListener('submit', function() {
+    const btn = document.getElementById('uploadBtn');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Uploading...';
+    btn.disabled = true;
+  });
+</script>
+{% endblock %}

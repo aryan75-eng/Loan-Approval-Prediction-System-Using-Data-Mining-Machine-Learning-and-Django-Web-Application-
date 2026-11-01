@@ -1,0 +1,212 @@
+/*
+ * style.css — Loan Approval Prediction System
+ * Financial theme: deep blue + white + light grey
+ */
+
+/* ── Root Variables ─────────────────────────────────────────────────────────── */
+:root {
+  --blue-900: #0d47a1;
+  --blue-700: #1565c0;
+  --blue-500: #1976d2;
+  --blue-100: #bbdefb;
+  --grey-bg:  #f5f7fa;
+  --sidebar-width: 240px;
+  --sidebar-bg: #0d47a1;
+  --sidebar-text: #e3f2fd;
+  --navbar-height: 56px;
+  --card-radius: 12px;
+}
+
+/* ── Reset / Base ────────────────────────────────────────────────────────────── */
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--grey-bg);
+  color: #1a1a2e;
+  font-size: 0.92rem;
+}
+
+a { color: var(--blue-500); }
+
+/* ── Sidebar ─────────────────────────────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-width);
+  min-height: 100vh;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  flex-shrink: 0;
+  transition: width 0.2s ease;
+}
+
+.sidebar .nav-link {
+  color: rgba(255,255,255,0.75);
+  border-radius: 8px;
+  padding: 8px 12px;
+  transition: background 0.15s, color 0.15s;
+  font-size: 0.88rem;
+}
+
+.sidebar .nav-link:hover {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+}
+
+.sidebar .nav-link.active {
+  background: rgba(255,255,255,0.20);
+  color: #fff;
+  font-weight: 600;
+}
+
+.sidebar-brand {
+  color: #fff !important;
+  font-size: 1rem;
+  padding: 0.25rem 0;
+}
+
+.sidebar-divider {
+  border-color: rgba(255,255,255,0.15);
+  margin: 0.5rem 0;
+}
+
+.sidebar-user {
+  color: rgba(255,255,255,0.85);
+  font-size: 0.83rem;
+}
+
+/* ── Top Navbar ──────────────────────────────────────────────────────────────── */
+.top-navbar {
+  background: #fff;
+  border-bottom: 1px solid #e9ecef;
+  height: var(--navbar-height);
+}
+
+/* ── Main Content ────────────────────────────────────────────────────────────── */
+.main-content {
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+main.container-fluid {
+  padding-top: 1rem;
+}
+
+/* ── Cards ───────────────────────────────────────────────────────────────────── */
+.card {
+  border-radius: var(--card-radius);
+}
+
+.card-header {
+  border-radius: var(--card-radius) var(--card-radius) 0 0 !important;
+  font-weight: 600;
+}
+
+/* ── Stat Cards ──────────────────────────────────────────────────────────────── */
+.stat-card {
+  border-radius: var(--card-radius);
+}
+
+.stat-icon {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.stat-value {
+  line-height: 1.1;
+}
+
+.stat-label {
+  font-size: 0.78rem;
+}
+
+/* ── Auth Layout ─────────────────────────────────────────────────────────────── */
+.auth-wrapper {
+  background: linear-gradient(135deg, #0d47a1 0%, #1976d2 50%, #bbdefb 100%);
+  min-height: 100vh;
+}
+
+.auth-card {
+  border-radius: 16px;
+}
+
+/* ── Tables ──────────────────────────────────────────────────────────────────── */
+.table > :not(caption) > * > * {
+  padding: 0.6rem 0.75rem;
+}
+
+/* ── Progress bars ───────────────────────────────────────────────────────────── */
+.progress {
+  border-radius: 999px;
+  background: #e9ecef;
+}
+
+/* ── Result badge ────────────────────────────────────────────────────────────── */
+.result-badge {
+  font-size: 1rem !important;
+  letter-spacing: 0.05em;
+  border-radius: 8px !important;
+}
+
+/* ── Form controls ───────────────────────────────────────────────────────────── */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 0.2rem rgba(25, 118, 210, 0.2);
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────────── */
+.btn-primary {
+  background-color: var(--blue-500);
+  border-color: var(--blue-500);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--blue-700);
+  border-color: var(--blue-700);
+}
+
+.btn-outline-primary {
+  color: var(--blue-500);
+  border-color: var(--blue-500);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--blue-500);
+  border-color: var(--blue-500);
+  color: #fff;
+}
+
+/* ── Pagination ──────────────────────────────────────────────────────────────── */
+.page-link {
+  color: var(--blue-500);
+}
+
+.page-item.active .page-link {
+  background-color: var(--blue-500);
+  border-color: var(--blue-500);
+}
+
+/* ── Code ────────────────────────────────────────────────────────────────────── */
+code {
+  color: #0d47a1;
+  background: #e3f2fd;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+/* ── Responsive: Sidebar collapse on small screens ───────────────────────────── */
+@media (max-width: 767.98px) {
+  .sidebar {
+    display: none !important;
+  }
+}
+
+/* ── Scrollbar styling ───────────────────────────────────────────────────────── */
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }

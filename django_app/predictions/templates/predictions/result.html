@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Prediction Result{% endblock %}
+{% block page_title %}Prediction Result{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-2">
+  <div class="col-lg-7 col-xl-6">
+
+    <!-- Main Result Card -->
+    <div class="card border-0 shadow-lg text-center">
+      <div class="card-body p-5">
+
+        {% if prediction.is_approved %}
+          <div class="result-icon mb-3">
+            <i class="bi bi-check-circle-fill text-success" style="font-size:4rem"></i>
+          </div>
+          <h2 class="fw-bold text-success mb-1">Loan Approved</h2>
+          <p class="text-muted">The applicant is likely to be approved based on the submitted data.</p>
+          <div class="result-badge badge bg-success-subtle text-success border border-success py-2 px-4 fs-6 mb-4">
+            ✓ APPROVED
+          </div>
+        {% else %}
+          <div class="result-icon mb-3">
+            <i class="bi bi-x-circle-fill text-danger" style="font-size:4rem"></i>
+          </div>
+          <h2 class="fw-bold text-danger mb-1">Loan Rejected</h2>
+          <p class="text-muted">Based on the submitted data, this application is likely to be rejected.</p>
+          <div class="result-badge badge bg-danger-subtle text-danger border border-danger py-2 px-4 fs-6 mb-4">
+            ✗ REJECTED
+          </div>
+        {% endif %}
+
+        <!-- Probability Bars -->
+        <div class="text-start mb-4">
+          <div class="d-flex justify-content-between mb-1">
+            <small class="fw-semibold">Approval Probability</small>
+            <small class="text-muted">{{ prediction.approved_pct }}%</small>
+          </div>
+          <div class="progress mb-3" style="height:12px; border-radius:6px">
+            <div class="progress-bar bg-success"
+                 style="width:{{ prediction.approved_pct }}%"
+                 role="progressbar"
+                 aria-valuenow="{{ prediction.approved_pct }}"
+                 aria-valuemin="0" aria-valuemax="100">
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between mb-1">
+            <small class="fw-semibold">Prediction Confidence</small>
+            <small class="text-muted">{{ prediction.prediction_pct }}%</small>
+          </div>
+          <div class="progress" style="height:12px; border-radius:6px">
+            <div class="progress-bar {% if prediction.is_approved %}bg-success{% else %}bg-danger{% endif %}"
+                 style="width:{{ prediction.prediction_pct }}%"
+                 role="progressbar">
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 justify-content-center">
+          <a href="{% url 'predictions:predict' %}" class="btn btn-primary">
+            <i class="bi bi-arrow-repeat me-1"></i>New Prediction
+          </a>
+          <a href="{% url 'predictions:history' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-clock-history me-1"></i>History
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Input Summary -->
+    <div class="card border-0 shadow-sm mt-4">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="mb-0 fw-semibold"><i class="bi bi-person me-2 text-primary"></i>Submitted Inputs</h6>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm table-hover mb-0">
+          <thead class="table-light"><tr><th>Field</th><th>Value</th></tr></thead>
+          <tbody>
+            {% for key, val in prediction.input_data.items %}
+            <tr>
+              <td class="text-muted">{{ key }}</td>
+              <td class="fw-semibold">{{ val }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="alert alert-secondary mt-3 py-2 small">
+      <i class="bi bi-shield-exclamation me-1"></i>
+      <strong>Educational Use Only.</strong> This result is produced by a model trained on a
+      614-record dataset and is not suitable for real financial decisions.
+    </div>
+
+  </div>
+</div>
+{% endblock %}

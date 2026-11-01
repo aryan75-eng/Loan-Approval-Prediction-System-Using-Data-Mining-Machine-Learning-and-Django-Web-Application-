@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — LoanPredict{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4 mt-1">
+
+  <!-- Stat Card 1: Total Records -->
+  <div class="col-6 col-md-4 col-xl-3">
+    {% include "partials/stat_card.html" with icon="bi-table" label="Dataset Records" value=total_records color="primary" %}
+  </div>
+
+  <!-- Stat Card 2: Total Features -->
+  <div class="col-6 col-md-4 col-xl-3">
+    {% include "partials/stat_card.html" with icon="bi-layout-three-columns" label="Total Features" value=total_features color="info" %}
+  </div>
+
+  <!-- Stat Card 3: Missing Values -->
+  <div class="col-6 col-md-4 col-xl-3">
+    {% include "partials/stat_card.html" with icon="bi-question-circle" label="Missing Values" value=missing_values color="warning" %}
+  </div>
+
+  <!-- Stat Card 4: Duplicates -->
+  <div class="col-6 col-md-4 col-xl-3">
+    {% include "partials/stat_card.html" with icon="bi-copy" label="Duplicate Rows" value=duplicate_count color="secondary" %}
+  </div>
+
+  <!-- Stat Card 5: Model Accuracy -->
+  <div class="col-6 col-md-4 col-xl-3">
+    {% include "partials/stat_card.html" with icon="bi-trophy" label="Model Accuracy" value=model_accuracy color="success" %}
+  </div>
+
+  <!-- Stat Card 6: Approved -->
+  <div class="col-6 col-md-4 col-xl-3">
+    {% include "partials/stat_card.html" with icon="bi-check-circle" label="Approved (You)" value=approved_count color="success" %}
+  </div>
+
+  <!-- Stat Card 7: Rejected -->
+  <div class="col-6 col-md-4 col-xl-3">
+    {% include "partials/stat_card.html" with icon="bi-x-circle" label="Rejected (You)" value=rejected_count color="danger" %}
+  </div>
+
+  <!-- Stat Card 8: Recent Predictions -->
+  <div class="col-6 col-md-4 col-xl-3">
+    {% include "partials/stat_card.html" with icon="bi-clock-history" label="Predictions (7 days)" value=recent_count color="primary" %}
+  </div>
+
+</div>
+
+<!-- ── Model Info Banner ────────────────────────────────────────────────── -->
+{% if selected_model %}
+<div class="alert alert-info d-flex align-items-center gap-2 py-2 mb-4">
+  <i class="bi bi-cpu fs-5"></i>
+  <div>
+    Active model: <strong>{{ selected_model.model_name }}</strong>
+    &nbsp;|&nbsp; Accuracy: <strong>{{ selected_model.accuracy_pct }}%</strong>
+    &nbsp;|&nbsp; F1: <strong>{{ selected_model.f1_pct }}%</strong>
+    <a href="{% url 'predictions:performance' %}" class="ms-2 small">View details →</a>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-warning d-flex align-items-center gap-2 py-2 mb-4">
+  <i class="bi bi-exclamation-triangle fs-5"></i>
+  <div>No model loaded yet. Run <code>python src/model_training.py</code> then
+    <code>python manage.py load_model_metrics</code>.
+  </div>
+</div>
+{% endif %}
+
+<div class="row g-4">
+
+  <!-- ── Recent Predictions Table ──────────────────────────────────────── -->
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
+        <h6 class="mb-0 fw-semibold"><i class="bi bi-clock-history me-2 text-primary"></i>Recent Predictions</h6>
+        <a href="{% url 'predictions:history' %}" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <div class="card-body p-0">
+        {% if recent_predictions %}
+        <div class="table-responsive">
+          <table class="table table-hover table-sm mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>#</th>
+                <th>Result</th>
+                <th>P(Approved)</th>
+                <th>Date</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for pred in recent_predictions %}
+              <tr>
+                <td class="text-muted small">{{ pred.id }}</td>
+                <td>
+                  {% if pred.is_approved %}
+                    <span class="badge bg-success-subtle text-success border border-success-subtle">
+                      <i class="bi bi-check-circle me-1"></i>Approved
+                    </span>
+                  {% else %}
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                      <i class="bi bi-x-circle me-1"></i>Rejected
+                    </span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="progress flex-grow-1" style="height:6px">
+                      <div class="progress-bar bg-success" style="width:{{ pred.approved_pct }}%"></div>
+                    </div>
+                    <small class="text-muted">{{ pred.approved_pct }}%</small>
+                  </div>
+                </td>
+                <td class="text-muted small">{{ pred.created_at|date:"M d, H:i" }}</td>
+                <td>
+                  <a href="{% url 'predictions:result' pred.pk %}" class="btn btn-xs btn-outline-secondary" style="font-size:.7rem;padding:1px 6px">View</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+          No predictions yet. <a href="{% url 'predictions:predict' %}">Make your first prediction</a>.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Quick Actions + Recent Datasets ───────────────────────────────── -->
+  <div class="col-lg-4">
+
+    <!-- Quick Actions -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="mb-0 fw-semibold"><i class="bi bi-lightning me-2 text-primary"></i>Quick Actions</h6>
+      </div>
+      <div class="card-body d-grid gap-2">
+        <a href="{% url 'predictions:predict' %}" class="btn btn-primary">
+          <i class="bi bi-play-circle me-2"></i>Predict Loan Approval
+        </a>
+        <a href="{% url 'datasets:upload' %}" class="btn btn-outline-primary">
+          <i class="bi bi-cloud-upload me-2"></i>Upload Dataset
+        </a>
+        <a href="{% url 'analytics:visualizations' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-images me-2"></i>View Visualizations
+        </a>
+        <a href="{% url 'predictions:performance' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-trophy me-2"></i>Model Performance
+        </a>
+      </div>
+    </div>
+
+    <!-- Recent Datasets -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
+        <h6 class="mb-0 fw-semibold"><i class="bi bi-database me-2 text-primary"></i>My Datasets</h6>
+        <a href="{% url 'datasets:list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for ds in recent_datasets %}
+        <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+          <div class="overflow-hidden">
+            <div class="text-truncate small fw-semibold">{{ ds.dataset_name }}</div>
+            <small class="text-muted">{{ ds.total_records }} rows · {{ ds.upload_date|date:"M d" }}</small>
+          </div>
+          <span class="badge {% if ds.status == 'validated' %}bg-success{% elif ds.status == 'error' %}bg-danger{% else %}bg-secondary{% endif %} ms-2">
+            {{ ds.status }}
+          </span>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-center text-muted py-4">
+          No datasets uploaded yet.
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
